@@ -1,61 +1,33 @@
-import { PrismaClient } from "./client/client.js";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-const adapter = new PrismaMariaDb({
-	host: "localhost",
-	port: 3306,
-	user: "root",
-	password: "root",
-	database: "zentime_db",
-});
-export const prisma = new PrismaClient({ adapter });
+import { prisma } from "./db.js";
+import bcrypt from "bcrypt";
 
 async function main() {
-	console.log("Initialisation des données (roles et pauses)");
+	console.log("Initialisation des données...");
 
-	const roles = [
-		{ id_role: 1, libelle_role: "RH" },
-		{ id_role: 2, libelle_role: "Manager" },
-		{ id_role: 3, libelle_role: "Collaborateur" },
-	];
+	const adminRole = await prisma.role.upsert({
+		where: { libelle_role: "Administrateur" },
+		update: {},
+		create: { libelle_role: "Administrateur" },
+	});
 
-	for (const role of roles) {
-		await prisma.role.upsert({
-			where: { id_role: role.id_role },
-			update: {},
-			create: role,
-		});
-	}
+	const hashedPassword = await bcrypt.hash("ZenTime2026+", 10);
 
-	const types = [
-		{
-			id_type: 1,
-			libelle_type: "Pause Café",
-			description_type: "Moment de détente sociale",
-			duree_type: 5,
+	const adminUser = await prisma.utilisateur.upsert({
+		where: { mail_utilisateur: "admin@zentime.fr" },
+		update: {
+			nom_utilisateur: "Beouche",
+			prenom_utilisateur: "Zineddine",
 		},
-		{
-			id_type: 2,
-			libelle_type: "Étirements",
-			description_type: "Série de mouvements pour le dos",
-			duree_type: 10,
+		create: {
+			nom_utilisateur: "Beouche",
+			prenom_utilisateur: "Zineddine",
+			mail_utilisateur: "admin@zentime.fr",
+			mdp_utilisateur: hashedPassword,
+			id_role: adminRole.id_role,
 		},
-		{
-			id_type: 3,
-			libelle_type: "Méditation",
-			description_type: "Exercice de respiration guidée",
-			duree_type: 15,
-		},
-	];
+	});
 
-	for (const t of types) {
-		await prisma.type.upsert({
-			where: { id_type: t.id_type },
-			update: {},
-			create: t,
-		});
-	}
-
-	console.log("Données insérées avec succès !");
+	console.log("Données insérées avec succès ! Utilisateur crée : admin@zentime.fr / ZenTime2026+");
 }
 
 main()
