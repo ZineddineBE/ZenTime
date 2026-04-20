@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "./client"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Role {
+  id_role      Int           @id @default(autoincrement())
+  libelle_role String        @unique
+  utilisateurs Utilisateur[]
+}
+
+model Type {
+  id_type          Int     @id @default(autoincrement())
+  libelle_type     String  @unique
+  description_type String?
+  duree_type       Int?
+  pauses           Pause[]
+}
+
+model Utilisateur {
+  id_utilisateur               Int           @id @default(autoincrement())
+  nom_utilisateur              String
+  prenom_utilisateur           String
+  date_naissance_utilisateur   DateTime?
+  mail_utilisateur             String        @unique
+  mdp_utilisateur              String
+  consentement_rgpd_utilisateur Boolean       @default(false)
+  
+  // Relation récursive (Manager / Collaborateur)
+  id_utilisateur_1             Int?
+  manager                      Utilisateur?  @relation("Hierarchie", fields: [id_utilisateur_1], references: [id_utilisateur])
+  subordonnes                  Utilisateur[] @relation("Hierarchie")
+
+  // Relations externes
+  id_role                      Int
+  role                         Role          @relation(fields: [id_role], references: [id_role])
+  pauses                       Pause[]
+  suivis_stress                SuiviStress[]
+}
+
+model Pause {
+  id_pause          Int         @id @default(autoincrement())
+  heure_debut_pause DateTime?
+  heure_fin_pause   DateTime?
+  
+  id_type           Int
+  type_pause        Type        @relation(fields: [id_type], references: [id_type])
+  
+  id_utilisateur    Int
+  utilisateur       Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
+}
+
+model SuiviStress {
+  id_suivi_stress     Int         @id @default(autoincrement())
+  date_suivi_stress   DateTime    @default(now())
+  niveau_suivi_stress Int
+  
+  id_utilisateur      Int
+  utilisateur         Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
+}
