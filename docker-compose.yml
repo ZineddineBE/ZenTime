@@ -4,12 +4,26 @@ services:
     container_name: zentime-mysql
     restart: always
     environment:
-      MYSQL_DATABASE: zentime_db
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - '3306:3306'
+      - "${DB_PORT}:3306"
     volumes:
       - db_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: zentime
+    restart: always
+    ports:
+      - '3000:3000'
+      - '5555:5555'
+    env_file:
+      - .env
+    depends_on:
+      - db
 
 volumes:
   db_data:

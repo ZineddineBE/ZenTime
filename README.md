@@ -3,12 +3,13 @@
 
 ZenTime est une application web permettant de prévenir les risques psychosociaux, de suivre le stress et de planifier des pauses bien-être en entreprise.
 
-## Stack Technique
+## 🚀 Stack Technique
 
 * **Frontend & Framework** : Next.js 16.2 (App Router)
 * **Authentification** : Auth.js v5 (NextAuth @beta)
-* **Sécurité** : Bcrypt (Hachage des mots de passe) & Middleware (Protection des routes)
-* **Base de données** : MariaDB/MySQL (via Docker)
+* **Sécurité** : Bcrypt (Hachage des mots de passe) & Proxy (anciennement Middleware, pour la protection des routes)
+* **Base de données** : MariaDB/MySQL
+* **Infrastructure** : Docker & Docker Compose (Environnement conteneurisé multi-stage)
 * **ORM** : Prisma 7 avec Driver Adapters (@prisma/adapter-mariadb)
 * **Design & Icônes** : Tailwind CSS & Lucide-React
 
@@ -20,28 +21,35 @@ ZenTime est une application web permettant de prévenir les risques psychosociau
 - Modélisation du schéma (Utilisateurs, Rôles).
 - Script de Seed pour les données initiales.
 
-#### 🔐 Milestone 0.2 : Authentification & Sécurité (Actuel)
+#### ✅ Milestone 0.2 : Authentification & Sécurité (Actuel)
 - Mise en place de Auth.js v5.
 - Gestion des sessions via Server Components.
-- Sécurisation des accès via le **Middleware**.
+- Sécurisation des accès via le **Proxy** (nouveau standard Next.js 16).
 - Hachage des mots de passe avec Bcrypt.
 - Landing page dynamique et action de déconnexion.
+- Conteneurisation globale de l'application via Docker.
 
-## Installation et Démarrage
+## 🛠️ Installation et Démarrage
 
 ### 1. Cloner le projet
+```bash
+git clone [https://github.com/ZineddineBE/ZenTime.git](https://github.com/ZineddineBE/ZenTime.git)
+cd zentime
 `git clone https://github.com/ZineddineBE/ZenTime.git`
 `cd zentime`
 
 ### 2. Configurer l'environnement
-Créez un .env avec :
-`DATABASE_URL="mysql://root:root@localhost:3306/zentime_db"`
-`DB_HOST="localhost"`
-`DB_PORT=3306`
-`DB_USER="root"`
-`DB_PASSWORD="root"`
-`DB_NAME="zentime_db"`
-`AUTH_SECRET="votre_secret_genere"`
+# Variables pour l'adaptateur Prisma et l'application
+DATABASE_URL="mysql://root:root@db:3306/zentime_db"
+DB_HOST="db"
+DB_PORT=3306
+DB_USER="root"
+DB_PASSWORD="root"
+DB_NAME="zentime_db"
+
+# NextAuth v5
+AUTH_SECRET="votre_secret_genere_ici"
+AUTH_URL="http://localhost:3000"
 
 ### 3. Lancer l'infrastructure (Docker)
 Assurez-vous que Docker Desktop est lancé, puis :
@@ -60,6 +68,6 @@ Assurez-vous que Docker Desktop est lancé, puis :
 
 ## Outils de développement
 
-### Prisma Studio
-L'interface graphique pour visualiser les données en base.
-`npx prisma studio`
+### Prisma Studio (via Docker)
+Pour visualiser et éditer les données en base de manière visuelle directement depuis le conteneur :
+`docker exec -it -e HOST=0.0.0.0 zentime npx prisma studio --port 5555 --browser none`
