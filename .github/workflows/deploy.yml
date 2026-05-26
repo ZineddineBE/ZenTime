@@ -1,0 +1,42 @@
+name: Build and Push ZenTime Image
+
+on:
+  push:
+    branches:
+      - main # Déclenche le build + push lors du merge sur main
+  pull_request:
+    branches:
+      - main # Déclenche un build de test lors de l'ouverture d'une PR vers main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      # On ne se connecte à Docker Hub QUE si on est sur la branche main
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build et Push automatique
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          # push: true UNIQUEMENT si on est sur main. Si c'est une PR, push: false (juste un test)
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            zineddinebe/zentime-app:latest
+            zineddinebe/zentime-app:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
