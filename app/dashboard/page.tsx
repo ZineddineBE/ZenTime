@@ -52,7 +52,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <main className="px-8 pb-16 max-w-7xl mx-auto">
+      <main className="px-8 pt-16 pb-24 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
