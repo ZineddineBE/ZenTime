@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 
-// NextAuth initialise la vérification de session sans bcrypt ni Prisma
 export default NextAuth(authConfig).auth((req) => {
 	const isLoggedIn = !!req.auth;
 	const { pathname } = req.nextUrl;
