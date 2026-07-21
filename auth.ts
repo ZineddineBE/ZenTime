@@ -18,6 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 				const user = await prisma.utilisateur.findUnique({
 					where: { mail_utilisateur: credentials.email as string },
+					include: { role: true },
 				});
 
 				if (user && user.mdp_utilisateur) {
@@ -31,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 							id: user.id_utilisateur.toString(),
 							email: user.mail_utilisateur,
 							name: `${user.prenom_utilisateur} ${user.nom_utilisateur}`,
+							role: user.role.libelle_role,
 						};
 					}
 				}

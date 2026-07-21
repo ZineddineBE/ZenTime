@@ -4,6 +4,7 @@ import { authConfig } from "./auth.config";
 export default NextAuth(authConfig).auth((req) => {
 	const isLoggedIn = !!req.auth;
 	const { pathname } = req.nextUrl;
+	const role = req.auth?.user?.role;
 
 	if (pathname.startsWith("/login")) {
 		if (isLoggedIn) {
@@ -14,6 +15,16 @@ export default NextAuth(authConfig).auth((req) => {
 
 	if (!isLoggedIn) {
 		return Response.redirect(new URL("/login", req.nextUrl));
+	}
+
+	const estAdmin = role === "Administrateur";
+
+	if (pathname.startsWith("/manager") && role !== "Manager" && !estAdmin) {
+		return Response.redirect(new URL("/dashboard", req.nextUrl));
+	}
+
+	if (pathname.startsWith("/rh") && role !== "Responsable RH" && !estAdmin) {
+		return Response.redirect(new URL("/dashboard", req.nextUrl));
 	}
 });
 

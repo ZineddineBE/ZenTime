@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { auth, signOut } from "@/auth";
-import { Leaf, LogOut } from 'lucide-react';
+import { Leaf, LogOut, Users, Building2 } from 'lucide-react';
 
 export default async function Navbar() {
   const session = await auth();
   const isLoggedIn = !!session;
+  const role = session?.user?.role;
 
   return (
     <nav className="bg-white border-b border-slate-100 shadow-sm">
@@ -13,10 +14,26 @@ export default async function Navbar() {
           <Leaf size={28} fill="currentColor" />
           <span className="text-2xl font-bold text-slate-800">ZenTime</span>
         </Link>
-        
+
         <div className="flex items-center space-x-6">
           {isLoggedIn ? (
             <>
+              {(role === "Manager" || role === "Administrateur") && (
+                <Link
+                  href="/manager"
+                  className="flex items-center gap-1.5 text-slate-500 hover:text-emerald-600 font-semibold text-sm transition-colors"
+                >
+                  <Users size={16} /> Équipe
+                </Link>
+              )}
+              {(role === "Responsable RH" || role === "Administrateur") && (
+                <Link
+                  href="/rh"
+                  className="flex items-center gap-1.5 text-slate-500 hover:text-emerald-600 font-semibold text-sm transition-colors"
+                >
+                  <Building2 size={16} /> RH
+                </Link>
+              )}
               <span className="text-slate-600 font-medium hidden sm:block">
                 {session.user?.name}
               </span>

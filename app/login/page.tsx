@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, Leaf, Lock, Mail } from 'lucide-react';
-import { signIn } from "next-auth/react"; // Import important
-import { useRouter } from "next/navigation"; // Pour la redirection
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface InputFieldProps {
   label: string;
