@@ -44,6 +44,7 @@ model Utilisateur {
   role                         Role          @relation(fields: [id_role], references: [id_role])
   pauses                       Pause[]
   suivis_stress                SuiviStress[]
+  dons                         Don[]
 }
 
 model Pause {
@@ -62,7 +63,19 @@ model SuiviStress {
   id_suivi_stress     Int         @id @default(autoincrement())
   date_suivi_stress   DateTime    @default(now())
   niveau_suivi_stress Int
-  
+
   id_utilisateur      Int
   utilisateur         Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
+}
+
+model Don {
+  id_don            Int      @id @default(autoincrement())
+  montant_centimes  Int
+  devise            String   @default("eur")
+  stripe_session_id String   @unique
+  statut            String   @default("en_attente") // en_attente | paye
+  date_don          DateTime @default(now())
+
+  id_utilisateur    Int?
+  utilisateur       Utilisateur? @relation(fields: [id_utilisateur], references: [id_utilisateur])
 }

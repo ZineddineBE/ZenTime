@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth, signOut } from "@/auth";
 import { Leaf, LogOut, Users, Building2 } from 'lucide-react';
+import SupportButton from "@/app/components/support-button";
 
 export default async function Navbar() {
   const session = await auth();
@@ -37,6 +38,7 @@ export default async function Navbar() {
               <span className="text-slate-600 font-medium hidden sm:block">
                 {session.user?.name}
               </span>
+              <SupportButton />
               <form
                 action={async () => {
                   "use server";
