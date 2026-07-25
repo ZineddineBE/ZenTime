@@ -1,42 +1,55 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from "@/auth";
+import { prisma } from "@/prisma/db";
+import { HUMEURS, type Humeur } from "@/lib/stress";
 import Navbar from "@/app/components/navbar";
+import PauseCard from "@/app/components/pause-card";
+import CheckInModal from "@/app/components/checkin-modal";
 import {
-  Activity,
-  Wind,
   Coffee,
+  ListChecks,
+  Wind,
   TrendingUp,
-  Sparkles,
 } from 'lucide-react';
 
-// Typage TypeScript des cartes de statistiques
 interface StatCardProps {
   title: string;
   value: string;
   icon: React.ElementType;
   color: string;
-  isAI?: boolean;
 }
 
-const StatCard = ({ title, value, icon: Icon, color, isAI }: StatCardProps) => (
+const StatCard = ({ title, value, icon: Icon, color }: StatCardProps) => (
   <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center space-x-4 relative overflow-hidden">
     <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center text-white flex-shrink-0`}>
       <Icon size={22} />
     </div>
     <div className="flex-1">
-      <div className="flex items-center space-x-2">
-        <p className="text-slate-500 text-sm font-medium">{title}</p>
-        {isAI && (
-          <span className="flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-100 uppercase tracking-tighter">
-            <Sparkles size={10} className="mr-1" /> AI
-          </span>
-        )}
-      </div>
+      <p className="text-slate-500 text-sm font-medium">{title}</p>
       <h3 className="text-2xl font-bold text-slate-800 mt-0.5">{value}</h3>
     </div>
   </div>
 );
+
+function dureeEnMinutes(debut: Date, fin: Date): number {
+  return Math.round((fin.getTime() - debut.getTime()) / 60000);
+}
+
+function libelleHumeurPlusProche(niveau: number): string {
+  let plusProche: Humeur = "neutre";
+  let ecartMin = Infinity;
+
+  for (const cle of Object.keys(HUMEURS) as Humeur[]) {
+    const ecart = Math.abs(HUMEURS[cle].niveau - niveau);
+    if (ecart < ecartMin) {
+      ecartMin = ecart;
+      plusProche = cle;
+    }
+  }
+
+  return HUMEURS[plusProche].libelle;
+}
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -45,8 +58,44 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Extraction dynamique du prénom de l'utilisateur connecté
   const firstName = session.user?.name?.split(' ')[0] || "Utilisateur";
+  const idUtilisateur = Number(session.user?.id);
+
+  const debutJournee = new Date();
+  debutJournee.setHours(0, 0, 0, 0);
+
+  const [pausesAujourdhui, dernierSuivi, typeEtirement, typeRespiration] = await Promise.all([
+    prisma.pause.findMany({
+      where: {
+        id_utilisateur: idUtilisateur,
+        heure_debut_pause: { gte: debutJournee },
+      },
+    }),
+    prisma.suiviStress.findFirst({
+      where: { id_utilisateur: idUtilisateur },
+      orderBy: { date_suivi_stress: "desc" },
+    }),
+    prisma.type.findUnique({ where: { libelle_type: "Étirement" } }),
+    prisma.type.findUnique({ where: { libelle_type: "Respiration guidée" } }),
+  ]);
+
+  const tempsPauseMinutes = pausesAujourdhui
+    .filter((p) => p.heure_debut_pause && p.heure_fin_pause)
+    .reduce(
+      (total, p) => total + dureeEnMinutes(p.heure_debut_pause!, p.heure_fin_pause!),
+      0,
+    );
+
+  const pauseEtirementEnCours = pausesAujourdhui.find(
+    (p) => p.id_type === typeEtirement?.id_type && !p.heure_fin_pause,
+  );
+  const pauseRespirationEnCours = pausesAujourdhui.find(
+    (p) => p.id_type === typeRespiration?.id_type && !p.heure_fin_pause,
+  );
+
+  const statutActuel = dernierSuivi
+    ? libelleHumeurPlusProche(dernierSuivi.niveau_suivi_stress)
+    : "Zen";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -60,32 +109,32 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-slate-500 mt-1">Prêt pour une journée de travail sereine ?</p>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
             <div className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-100 px-5 py-2.5 rounded-full text-sm font-bold tracking-wide shadow-sm">
-              Statut : Zen
+              Statut : {statutActuel}
             </div>
+            <CheckInModal />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard
-            title="Temps de pause"
-            value="45 min"
+            title="Temps de pause (aujourd'hui)"
+            value={`${tempsPauseMinutes} min`}
             icon={Coffee}
             color="bg-orange-400"
           />
           <StatCard
-            title="Activité physique"
-            value="3 200 pas"
-            icon={Activity}
+            title="Pauses aujourd'hui"
+            value={`${pausesAujourdhui.length}`}
+            icon={ListChecks}
             color="bg-emerald-500"
           />
           <StatCard
-            title="Niveau de Stress"
-            value="Faible"
+            title="Dernière humeur renseignée"
+            value={statutActuel}
             icon={Wind}
             color="bg-sky-500"
-            isAI={true}
           />
         </div>
 
@@ -95,25 +144,25 @@ export default async function DashboardPage() {
               <TrendingUp className="mr-2 text-emerald-500" /> Suggestions du jour
             </h2>
             <div className="space-y-4">
-              <div className="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex items-center justify-between group hover:shadow-md transition-all">
-                <div>
-                  <p className="font-bold text-emerald-900">Étirement des cervicales</p>
-                  <p className="text-sm text-emerald-700 mt-0.5">Idéal après 2h passées sur écran</p>
-                </div>
-                <button className="bg-white text-emerald-600 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-emerald-600 hover:text-white transition-colors">
-                  Lancer
-                </button>
-              </div>
-              
-              <div className="p-5 bg-sky-50/50 rounded-2xl border border-sky-100 flex items-center justify-between group hover:shadow-md transition-all">
-                <div>
-                  <p className="font-bold text-sky-900">Respiration guidée (4-7-8)</p>
-                  <p className="text-sm text-sky-700 mt-0.5">Technique éprouvée de relaxation express</p>
-                </div>
-                <button className="bg-white text-sky-600 border border-sky-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-sky-600 hover:text-white transition-colors">
-                  Lancer
-                </button>
-              </div>
+              {typeEtirement ? (
+                <PauseCard
+                  idType={typeEtirement.id_type}
+                  titre="Étirement des cervicales"
+                  description="Idéal après 2h passées sur écran"
+                  couleur="emerald"
+                  pauseEnCoursId={pauseEtirementEnCours?.id_pause ?? null}
+                />
+              ) : null}
+
+              {typeRespiration ? (
+                <PauseCard
+                  idType={typeRespiration.id_type}
+                  titre="Respiration guidée (4-7-8)"
+                  description="Technique éprouvée de relaxation express"
+                  couleur="sky"
+                  pauseEnCoursId={pauseRespirationEnCours?.id_pause ?? null}
+                />
+              ) : null}
             </div>
           </div>
 

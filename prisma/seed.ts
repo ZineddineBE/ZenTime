@@ -1,7 +1,3 @@
-// Cible dans le projet : prisma/seed.ts (remplace le fichier existant)
-// Ajout : rôles Collaborateur/Manager/Responsable RH + comptes de démo
-// (manager + 3 collaborateurs rattachés) pour tester /manager et /rh.
-
 import { prisma } from "./db.js";
 import bcrypt from "bcrypt";
 
@@ -31,6 +27,37 @@ async function main() {
 		update: {},
 		create: { libelle_role: "Responsable RH" },
 	});
+
+	const typesPause = [
+		{
+			libelle_type: "Étirement",
+			description_type: "Étirements courts adaptés au poste de travail (cervicales, dos, poignets).",
+			duree_type: 5,
+		},
+		{
+			libelle_type: "Respiration guidée",
+			description_type: "Technique de respiration 4-7-8 pour réduire le stress rapidement.",
+			duree_type: 5,
+		},
+		{
+			libelle_type: "Marche courte",
+			description_type: "Marche brève pour rompre la sédentarité.",
+			duree_type: 10,
+		},
+		{
+			libelle_type: "Pause libre",
+			description_type: "Pause non guidée, à l'initiative du collaborateur.",
+			duree_type: 15,
+		},
+	];
+
+	for (const type of typesPause) {
+		await prisma.type.upsert({
+			where: { libelle_type: type.libelle_type },
+			update: {},
+			create: type,
+		});
+	}
 
 	const hashedPassword = await bcrypt.hash("ZenTime2026+", 10);
 
