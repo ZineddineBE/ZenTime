@@ -6,6 +6,7 @@ import { HUMEURS, type Humeur } from "@/lib/stress";
 import Navbar from "@/app/components/navbar";
 import PauseCard from "@/app/components/pause-card";
 import CheckInModal from "@/app/components/checkin-modal";
+import WeatherWidget from "@/app/components/weather-widget";
 import {
   Coffee,
   ListChecks,
@@ -110,6 +111,7 @@ export default async function DashboardPage() {
             <p className="text-slate-500 mt-1">Prêt pour une journée de travail sereine ?</p>
           </div>
           <div className="flex items-center gap-3">
+            <WeatherWidget />
             <div className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-100 px-5 py-2.5 rounded-full text-sm font-bold tracking-wide shadow-sm">
               Statut : {statutActuel}
             </div>
