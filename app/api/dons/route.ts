@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma/db";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const MONTANTS_AUTORISES = [3, 5, 10];
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 	const session = await auth();
 	const origin = request.headers.get("origin") ?? process.env.AUTH_URL ?? "http://localhost:3000";
 
-	const checkoutSession = await stripe.checkout.sessions.create({
+	const checkoutSession = await getStripe().checkout.sessions.create({
 		mode: "payment",
 		payment_method_types: ["card"],
 		line_items: [
