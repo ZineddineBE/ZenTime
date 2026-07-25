@@ -51,8 +51,13 @@ function libelleHumeurPlusProche(niveau: number): string {
   return HUMEURS[plusProche].libelle;
 }
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{ don?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await auth();
+  const { don } = await searchParams;
 
   if (!session) {
     redirect("/login");
@@ -102,6 +107,17 @@ export default async function DashboardPage() {
       <Navbar />
 
       <main className="px-8 pt-16 pb-24 max-w-7xl mx-auto">
+        {don === "succes" && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3 rounded-2xl text-sm font-semibold mb-8">
+            Merci pour votre soutien ! ☕ Votre paiement a bien été confirmé.
+          </div>
+        )}
+        {don === "annule" && (
+          <div className="bg-slate-100 border border-slate-200 text-slate-600 px-5 py-3 rounded-2xl text-sm font-semibold mb-8">
+            Paiement annulé — aucun montant n&apos;a été prélevé.
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
