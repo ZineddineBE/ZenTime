@@ -7,7 +7,7 @@ const SEUIL_STRESS_MODERE = 4;
 const PAUSES_MIN_RECOMMANDEES_PAR_JOUR = 3;
 const EFFECTIF_MIN_POUR_STATS_RH = 5;
 
-function classifierRisque(
+export function classifierRisque(
 	stressMoyen: number | null,
 	pausesParJour: number,
 ): NiveauRisque {
