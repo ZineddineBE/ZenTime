@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Documentation API — ZenTime</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Documentation OpenAPI de l'API REST de ZenTime." />
+  </head>
+  <body style="margin: 0">
+    <div id="app"></div>
+
+    <!--
+      Bundle Scalar auto-hébergé (vendored), volontairement hors de l'arbre
+      React/Next.js : cette page statique est servie telle quelle par Next.js
+      depuis /public, sans passer par app/layout.tsx ni globals.css (Tailwind).
+      Ça évite tout conflit de style (le "preflight" de Tailwind casse la mise
+      en forme de Scalar s'il est chargé dans la même page) et ça évite une
+      dépendance à un CDN externe pendant une démo.
+
+      Mise à jour du bundle : `npm pack @scalar/api-reference`, extraire le
+      tarball, puis recopier dist/browser/standalone.js ici.
+    -->
+    <script src="/scalar/standalone.js"></script>
+    <script>
+      Scalar.createApiReference("#app", {
+        url: "/openapi.yaml",
+      });
+    </script>
+  </body>
+</html>

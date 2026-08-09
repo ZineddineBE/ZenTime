@@ -1,0 +1,309 @@
+openapi: 3.1.0
+info:
+  title: ZenTime API
+  version: "1.0.0"
+  description: >
+    API REST de ZenTime — suivi des pauses, auto-évaluation du stress et
+    soutien financier du projet (dons Stripe). Toutes les routes (hors
+    `/api/dons` en création de session et le webhook Stripe) nécessitent
+    une session utilisateur active (cookie de session Auth.js / NextAuth v5,
+    obtenue via `/login`).
+  contact:
+    name: Zineddine BEOUCHE
+servers:
+  - url: http://localhost:3000
+    description: Environnement de développement local
+  - url: https://zentime.example.com
+    description: Environnement de production (à adapter au domaine réel)
+
+tags:
+  - name: Pauses
+    description: Démarrage et suivi des pauses bien-être du collaborateur
+  - name: Suivi du stress
+    description: Auto-évaluation quotidienne de l'humeur / du niveau de stress
+  - name: Dons
+    description: Soutien financier ponctuel du projet via Stripe Checkout
+
+paths:
+  /api/pauses:
+    get:
+      tags: [Pauses]
+      summary: Lister les pauses du jour de l'utilisateur connecté
+      description: Renvoie toutes les pauses de la journée en cours pour l'utilisateur authentifié, la plus récente en premier.
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Liste des pauses du jour
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pause"
+        "401":
+          $ref: "#/components/responses/NonAuthentifie"
+    post:
+      tags: [Pauses]
+      summary: Démarrer une nouvelle pause
+      description: Crée une pause en cours (`heure_fin_pause` non renseignée) pour un type de pause donné.
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_type]
+              properties:
+                id_type:
+                  type: integer
+                  description: Identifiant du type de pause (voir table `Type` — ex. étirement, respiration guidée)
+                  example: 1
+      responses:
+        "201":
+          description: Pause créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pause"
+        "400":
+          description: "`id_type` manquant/invalide, ou ce type de pause n'existe pas"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "401":
+          $ref: "#/components/responses/NonAuthentifie"
+
+  /api/pauses/{id}:
+    patch:
+      tags: [Pauses]
+      summary: Terminer une pause en cours
+      description: Renseigne `heure_fin_pause` sur la pause donnée. Seul le propriétaire de la pause peut la terminer.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la pause (`id_pause`)
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Pause terminée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pause"
+        "400":
+          description: Identifiant invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "401":
+          $ref: "#/components/responses/NonAuthentifie"
+        "403":
+          description: Cette pause appartient à un autre utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "404":
+          description: Pause introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "409":
+          description: Cette pause est déjà terminée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+
+  /api/suivi-stress:
+    post:
+      tags: [Suivi du stress]
+      summary: Enregistrer l'humeur / le niveau de stress du moment
+      description: >
+        Crée une entrée de suivi de stress pour l'utilisateur connecté. L'humeur choisie
+        est convertie en un niveau numérique de 1 (zen) à 9 (stressé).
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [humeur]
+              properties:
+                humeur:
+                  type: string
+                  enum: [stresse, fatigue, neutre, bien, zen]
+                  example: neutre
+      responses:
+        "201":
+          description: Suivi de stress enregistré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuiviStress"
+        "400":
+          description: Humeur manquante ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "401":
+          $ref: "#/components/responses/NonAuthentifie"
+
+  /api/dons:
+    post:
+      tags: [Dons]
+      summary: Créer une session de paiement Stripe pour un don ponctuel
+      description: >
+        Ouvre une session Stripe Checkout ("offrir un café"). Accessible sans
+        authentification (don anonyme possible) ; si l'utilisateur est connecté,
+        le don lui est rattaché.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [montant]
+              properties:
+                montant:
+                  type: integer
+                  description: Montant du don en euros
+                  enum: [3, 5, 10]
+      responses:
+        "200":
+          description: Session de paiement créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: URL de redirection vers Stripe Checkout
+        "400":
+          description: Montant invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+        "500":
+          description: Impossible de créer la session de paiement côté Stripe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+
+  /api/dons/webhook:
+    post:
+      tags: [Dons]
+      summary: Webhook Stripe (usage interne)
+      description: >
+        Route appelée uniquement par Stripe pour confirmer le paiement d'un don.
+        Vérifie la signature de la requête via l'en-tête `stripe-signature` et le
+        secret `STRIPE_WEBHOOK_SECRET`. **Ne pas appeler manuellement.**
+      security: []
+      parameters:
+        - name: stripe-signature
+          in: header
+          required: true
+          description: Signature Stripe de la requête, permettant de vérifier son authenticité
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Corps brut de l'événement Stripe (`Stripe.Event`)
+      responses:
+        "200":
+          description: Événement traité (ou ignoré s'il ne concerne pas un paiement complété)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+        "400":
+          description: En-tête de signature absent, secret non configuré, ou signature invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: authjs.session-token
+      description: >
+        Cookie de session posé par Auth.js / NextAuth v5 (stratégie JWT) après
+        connexion via `/login`. En production (HTTPS), le cookie est nommé
+        `__Secure-authjs.session-token`.
+
+  responses:
+    NonAuthentifie:
+      description: Aucune session utilisateur active
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erreur"
+
+  schemas:
+    Erreur:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: "Non authentifié"
+
+    Pause:
+      type: object
+      properties:
+        id_pause:
+          type: integer
+        heure_debut_pause:
+          type: string
+          format: date-time
+          nullable: true
+        heure_fin_pause:
+          type: string
+          format: date-time
+          nullable: true
+        id_type:
+          type: integer
+        id_utilisateur:
+          type: integer
+
+    SuiviStress:
+      type: object
+      properties:
+        id_suivi_stress:
+          type: integer
+        date_suivi_stress:
+          type: string
+          format: date-time
+        niveau_suivi_stress:
+          type: integer
+          minimum: 1
+          maximum: 9
+        id_utilisateur:
+          type: integer
