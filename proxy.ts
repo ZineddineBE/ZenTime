@@ -29,5 +29,8 @@ export default NextAuth(authConfig).auth((req) => {
 });
 
 export const config = {
-	matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+	// route publique
+	matcher: [
+		"/((?!api|api-docs.html|openapi.yaml|scalar/|_next/static|_next/image|favicon.ico).*)",
+	],
 };

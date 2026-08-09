@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth, signOut } from "@/auth";
-import { Leaf, LogOut, Users, Building2 } from 'lucide-react';
+import { Leaf, LogOut, Users, Building2, Code2 } from 'lucide-react';
 import SupportButton from "@/app/components/support-button";
 
 export default async function Navbar() {
@@ -17,6 +17,12 @@ export default async function Navbar() {
         </Link>
 
         <div className="flex items-center space-x-6">
+          <Link
+            href="/api-docs.html"
+            className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-emerald-600 font-semibold text-sm transition-colors"
+          >
+            <Code2 size={16} /> API
+          </Link>
           {isLoggedIn ? (
             <>
               {(role === "Manager" || role === "Administrateur") && (
