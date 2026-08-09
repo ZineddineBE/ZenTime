@@ -11,15 +11,16 @@ export default defineConfig({
 		},
 	},
 	test: {
+		// Par défaut "node" (routes API) ; les tests de composants passent en
+		// jsdom via le pragma `// @vitest-environment jsdom` en tête de fichier.
 		environment: "node",
-		include: ["**/*.test.ts"],
+		include: ["**/*.test.ts", "**/*.test.tsx"],
 		exclude: ["node_modules/**", ".next/**"],
+		setupFiles: ["./vitest.setup.ts"],
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "html", "lcov"],
-			// Périmètre initial : les routes API et la logique métier pure.
-			// Les pages/composants React seront couverts par une itération suivante.
-			include: ["app/api/**/route.ts", "lib/**/*.ts"],
+			include: ["app/api/**/route.ts", "lib/**/*.ts", "app/components/**/*.tsx"],
 		},
 	},
 });
