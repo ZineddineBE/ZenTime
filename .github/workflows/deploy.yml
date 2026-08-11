@@ -71,9 +71,7 @@ jobs:
         run: npm run test:coverage
 
       - name: SonarCloud Scan
-        # Épinglé sur un hash de commit (pas un tag mobile comme @v5) : un tag
-        # peut être redéplacé vers du code malveillant, un hash de commit non.
-        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
