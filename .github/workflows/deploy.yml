@@ -39,6 +39,10 @@ jobs:
 
   sonarcloud:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # nécessaire pour que Sonar dépose son résumé sur la PR
+      checks: write
     # Analyse de qualité/sécurité du code (SAST). Informatif pour l'instant :
     # ne bloque pas le build tant que les premiers résultats n'ont pas été
     # passés en revue (voir Security.md).
