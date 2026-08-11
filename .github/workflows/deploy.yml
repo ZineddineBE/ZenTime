@@ -31,6 +31,38 @@ jobs:
       - name: Run tests
         run: npm test
 
+  sonarcloud:
+    runs-on: ubuntu-latest
+    # Analyse de qualité/sécurité du code (SAST). Informatif pour l'instant :
+    # ne bloque pas le build tant que les premiers résultats n'ont pas été
+    # passés en revue (voir Security.md).
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historique complet requis par l'analyse SonarCloud
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
