@@ -3,6 +3,7 @@ import { authConfig } from "./auth.config";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./prisma/db";
 import bcrypt from "bcrypt";
+import { estBloque, enregistrerEchec, reinitialiser } from "./lib/rate-limit";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	...authConfig,
@@ -16,8 +17,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			async authorize(credentials) {
 				if (!credentials?.email || !credentials?.password) return null;
 
+				const email = credentials.email as string;
+
+				// Anti-bruteforce : trop d'échecs récents sur cet email -> on ne
+				// tente même pas de vérifier le mot de passe.
+				if (estBloque(email)) return null;
+
 				const user = await prisma.utilisateur.findUnique({
-					where: { mail_utilisateur: credentials.email as string },
+					where: { mail_utilisateur: email },
 					include: { role: true },
 				});
 
@@ -28,6 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					);
 
 					if (isPasswordCorrect) {
+						reinitialiser(email);
 						return {
 							id: user.id_utilisateur.toString(),
 							email: user.mail_utilisateur,
@@ -37,6 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					}
 				}
 
+				enregistrerEchec(email);
 				return null;
 			},
 		}),
