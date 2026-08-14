@@ -39,6 +39,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-white">
       <Navbar/>
 
+      <main>
       <section className="px-8 pt-16 pb-24 max-w-7xl mx-auto text-center">
         <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight">
           {isLoggedIn ? (
@@ -53,7 +54,7 @@ export default async function HomePage() {
           )}
         </h1>
         <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Un système complet pour suivre vos pauses, encourager l'activité
+          Un système complet pour suivre vos pauses, encourager l&apos;activité
           physique et apaiser votre esprit au quotidien.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -102,12 +103,12 @@ export default async function HomePage() {
 
       <section className="py-20 px-8 max-w-7xl mx-auto border-t border-slate-100">
         <div className="flex flex-col md:flex-row items-center justify-around gap-12 opacity-60">
-          <div className="flex items-center space-x-2">
+          <Link href="/confidentialite" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <ShieldCheck className="text-slate-400" />
             <span className="font-semibold text-slate-500 uppercase tracking-widest text-sm">
               Conforme RGPD
             </span>
-          </div>
+          </Link>
           <div className="flex items-center space-x-2">
             <BarChart3 className="text-slate-400" />
             <span className="font-semibold text-slate-500 uppercase tracking-widest text-sm">
@@ -116,6 +117,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </main>
     </div>
   );
 }
