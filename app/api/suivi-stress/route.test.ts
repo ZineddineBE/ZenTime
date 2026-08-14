@@ -5,6 +5,7 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/prisma/db", () => ({
 	prisma: {
 		suiviStress: { create: vi.fn() },
+		utilisateur: { findUnique: vi.fn() },
 	},
 }));
 
@@ -14,6 +15,7 @@ import { POST } from "./route";
 
 const authMock = auth as unknown as Mock;
 const createMock = prisma.suiviStress.create as unknown as Mock;
+const utilisateurFindUniqueMock = prisma.utilisateur.findUnique as unknown as Mock;
 
 function requeteAvecHumeur(body: unknown) {
 	return new NextRequest("http://localhost/api/suivi-stress", {
@@ -25,6 +27,7 @@ function requeteAvecHumeur(body: unknown) {
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	utilisateurFindUniqueMock.mockResolvedValue({ consentement_rgpd_utilisateur: true });
 });
 
 describe("POST /api/suivi-stress", () => {
@@ -34,6 +37,16 @@ describe("POST /api/suivi-stress", () => {
 		const res = await POST(requeteAvecHumeur({ humeur: "zen" }));
 
 		expect(res.status).toBe(401);
+		expect(createMock).not.toHaveBeenCalled();
+	});
+
+	it("renvoie 403 si l'utilisateur n'a pas donné son consentement RGPD", async () => {
+		authMock.mockResolvedValue({ user: { id: "1" } });
+		utilisateurFindUniqueMock.mockResolvedValue({ consentement_rgpd_utilisateur: false });
+
+		const res = await POST(requeteAvecHumeur({ humeur: "zen" }));
+
+		expect(res.status).toBe(403);
 		expect(createMock).not.toHaveBeenCalled();
 	});
 

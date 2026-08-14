@@ -6,6 +6,7 @@ vi.mock("@/prisma/db", () => ({
 	prisma: {
 		pause: { findMany: vi.fn(), create: vi.fn() },
 		type: { findUnique: vi.fn() },
+		utilisateur: { findUnique: vi.fn() },
 	},
 }));
 
@@ -17,6 +18,7 @@ const authMock = auth as unknown as Mock;
 const findManyMock = prisma.pause.findMany as unknown as Mock;
 const createMock = prisma.pause.create as unknown as Mock;
 const typeFindUniqueMock = prisma.type.findUnique as unknown as Mock;
+const utilisateurFindUniqueMock = prisma.utilisateur.findUnique as unknown as Mock;
 
 function requestAvecCorps(body: unknown) {
 	return new NextRequest("http://localhost/api/pauses", {
@@ -28,6 +30,9 @@ function requestAvecCorps(body: unknown) {
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	// Consenti par défaut : les tests ci-dessous portent sur la logique des
+	// pauses elle-même, pas sur la vérification RGPD (testée à part plus bas).
+	utilisateurFindUniqueMock.mockResolvedValue({ consentement_rgpd_utilisateur: true });
 });
 
 describe("GET /api/pauses", () => {
@@ -64,6 +69,16 @@ describe("POST /api/pauses", () => {
 		const res = await POST(requestAvecCorps({ id_type: 1 }));
 
 		expect(res.status).toBe(401);
+	});
+
+	it("renvoie 403 si l'utilisateur n'a pas donné son consentement RGPD", async () => {
+		authMock.mockResolvedValue({ user: { id: "1" } });
+		utilisateurFindUniqueMock.mockResolvedValue({ consentement_rgpd_utilisateur: false });
+
+		const res = await POST(requestAvecCorps({ id_type: 1 }));
+
+		expect(res.status).toBe(403);
+		expect(createMock).not.toHaveBeenCalled();
 	});
 
 	it.each([

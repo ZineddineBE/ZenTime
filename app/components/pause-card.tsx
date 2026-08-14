@@ -55,9 +55,12 @@ export default function PauseCard({
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ id_type: idType }),
 			});
-			if (!reponse.ok) throw new Error();
-			const pause = await reponse.json();
-			setPauseId(pause.id_pause);
+			const donnees = await reponse.json().catch(() => null);
+			if (!reponse.ok) {
+				setErreur(donnees?.error ?? "Impossible de démarrer la pause");
+				return;
+			}
+			setPauseId(donnees.id_pause);
 			router.refresh();
 		} catch {
 			setErreur("Impossible de démarrer la pause");

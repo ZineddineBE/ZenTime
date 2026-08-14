@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma/db";
 import { HUMEURS, type Humeur } from "@/lib/stress";
+import { aConsenti } from "@/lib/rgpd";
 
 export async function POST(request: NextRequest) {
 	const session = await auth();
 	if (!session?.user?.id) {
 		return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+	}
+
+	if (!(await aConsenti(Number(session.user.id)))) {
+		return NextResponse.json(
+			{ error: "Consentement RGPD requis avant de pouvoir enregistrer des données de bien-être" },
+			{ status: 403 },
+		);
 	}
 
 	const body = await request.json().catch(() => null);

@@ -38,7 +38,11 @@ export default function CheckInModal() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ humeur: selection }),
 			});
-			if (!reponse.ok) throw new Error();
+			if (!reponse.ok) {
+				const donnees = await reponse.json().catch(() => null);
+				setErreur(donnees?.error ?? "Impossible d'enregistrer votre état, réessayez.");
+				return;
+			}
 			fermer();
 			router.refresh();
 		} catch {

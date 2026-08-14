@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth, signOut } from "@/auth";
-import { Leaf, LogOut, Users, Building2, Code2 } from 'lucide-react';
+import { Leaf, LogOut, Users, Building2, Code2, ShieldCheck } from 'lucide-react';
 import SupportButton from "@/app/components/support-button";
 
 export default async function Navbar() {
@@ -41,6 +41,12 @@ export default async function Navbar() {
                   <Building2 size={16} /> RH
                 </Link>
               )}
+              <Link
+                href="/confidentialite"
+                className="flex items-center gap-1.5 text-slate-500 hover:text-emerald-600 font-semibold text-sm transition-colors"
+              >
+                <ShieldCheck size={16} /> Confidentialité
+              </Link>
               <span className="text-slate-600 font-medium hidden sm:block">
                 {session.user?.name}
               </span>
