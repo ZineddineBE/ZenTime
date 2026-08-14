@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /manager
+Disallow: /rh
+Disallow: /confidentialite
+Disallow: /api/

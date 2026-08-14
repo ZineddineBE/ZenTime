@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Eye, EyeOff, Leaf, Lock, Mail } from 'lucide-react';
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -61,7 +62,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-sky-50 flex items-center justify-center p-6">
+    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-sky-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-emerald-900/5 border border-white p-10">
         
         <div className="text-center mb-10">
@@ -99,7 +100,8 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-[41px] text-slate-400 hover:text-emerald-600 transition-colors"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              className="absolute right-1 top-[25px] p-3 text-slate-400 hover:text-emerald-600 transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -120,7 +122,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all transform hover:-translate-y-1 active:scale-95"
+            className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all transform hover:-translate-y-1 active:scale-95"
           >
             Se connecter
           </button>
@@ -128,10 +130,10 @@ export default function LoginPage() {
 
         <div className="mt-10 text-center">
           <p className="text-slate-500 text-sm">
-            Plateforme conforme au <a href="#" className="underline">RGPD</a>
+            Plateforme conforme au <Link href="/confidentialite" className="underline">RGPD</Link>
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
