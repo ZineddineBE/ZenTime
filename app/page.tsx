@@ -81,19 +81,19 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={Coffee}
-              title="Pauses Intelligentes"
+              title="Pauses intelligentes"
               description="Alertes personnalisées pour éviter de rester assis trop longtemps et réduire la fatigue."
               color="bg-orange-400"
             />
             <FeatureCard
               icon={Activity}
-              title="Activité Adaptée"
+              title="Activité adaptée"
               description="Des exercices simples d'étirement conçus pour votre poste de travail."
               color="bg-emerald-500"
             />
             <FeatureCard
               icon={Brain}
-              title="Santé Mentale"
+              title="Santé mentale"
               description="Méditation et respiration guidée pour réduire le stress prolongé."
               color="bg-sky-500"
             />
