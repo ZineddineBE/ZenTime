@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const refreshMock = vi.fn();
@@ -58,9 +58,7 @@ describe("PauseCard", () => {
 				body: JSON.stringify({ id_type: 1 }),
 			}),
 		);
-		await waitFor(() =>
-			expect(screen.getByRole("button", { name: "Terminer" })).toBeInTheDocument(),
-		);
+		expect(await screen.findByRole("button", { name: "Terminer" })).toBeInTheDocument();
 		expect(refreshMock).toHaveBeenCalled();
 	});
 
@@ -81,9 +79,7 @@ describe("PauseCard", () => {
 		await utilisateur.click(screen.getByRole("button", { name: "Terminer" }));
 
 		expect(fetchMock).toHaveBeenCalledWith("/api/pauses/42", { method: "PATCH" });
-		await waitFor(() =>
-			expect(screen.getByRole("button", { name: "Lancer" })).toBeInTheDocument(),
-		);
+		expect(await screen.findByRole("button", { name: "Lancer" })).toBeInTheDocument();
 		expect(refreshMock).toHaveBeenCalled();
 	});
 
