@@ -19,7 +19,7 @@ export default function SupportButton() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ montant }),
 			});
-			if (!reponse.ok) throw new Error();
+			if (!reponse.ok) throw new Error("Échec de la création de la session de paiement");
 			const { url } = await reponse.json();
 			window.location.href = url;
 		} catch {

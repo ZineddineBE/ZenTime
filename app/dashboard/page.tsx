@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 
 interface StatCardProps {
-  title: string;
-  value: string;
-  icon: React.ElementType;
-  color: string;
+  readonly title: string;
+  readonly value: string;
+  readonly icon: React.ElementType;
+  readonly color: string;
 }
 
 const StatCard = ({ title, value, icon: Icon, color }: StatCardProps) => (
@@ -53,7 +53,7 @@ function libelleHumeurPlusProche(niveau: number): string {
 }
 
 interface DashboardPageProps {
-  searchParams: Promise<{ don?: string }>;
+  readonly searchParams: Promise<{ don?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {

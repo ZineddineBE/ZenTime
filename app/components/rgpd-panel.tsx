@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, ShieldOff } from "lucide-react";
 
 interface RgpdPanelProps {
-	aConsentiInitialement: boolean;
+	readonly aConsentiInitialement: boolean;
 }
 
 export default function RgpdPanel({ aConsentiInitialement }: RgpdPanelProps) {
@@ -20,7 +20,7 @@ export default function RgpdPanel({ aConsentiInitialement }: RgpdPanelProps) {
 		setErreur(null);
 		try {
 			const reponse = await fetch("/api/rgpd/consentement", { method: "POST" });
-			if (!reponse.ok) throw new Error();
+			if (!reponse.ok) throw new Error("Échec de l'enregistrement du consentement");
 			setAConsenti(true);
 			router.refresh();
 		} catch {
@@ -35,7 +35,7 @@ export default function RgpdPanel({ aConsentiInitialement }: RgpdPanelProps) {
 		setErreur(null);
 		try {
 			const reponse = await fetch("/api/rgpd/revoquer", { method: "POST" });
-			if (!reponse.ok) throw new Error();
+			if (!reponse.ok) throw new Error("Échec de la révocation du consentement");
 			setAConsenti(false);
 			setCaseCochee(false);
 			router.refresh();
