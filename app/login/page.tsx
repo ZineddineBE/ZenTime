@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, type FormEvent } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Leaf, Lock, Mail } from 'lucide-react';
 import { signIn } from "next-auth/react";
@@ -37,7 +37,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(""); // Reset de l'erreur
 
