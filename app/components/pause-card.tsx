@@ -26,11 +26,11 @@ const STYLES: Record<
 };
 
 interface PauseCardProps {
-	idType: number;
-	titre: string;
-	description: string;
-	couleur: Couleur;
-	pauseEnCoursId?: number | null;
+	readonly idType: number;
+	readonly titre: string;
+	readonly description: string;
+	readonly couleur: Couleur;
+	readonly pauseEnCoursId?: number | null;
 }
 
 export default function PauseCard({
@@ -75,7 +75,7 @@ export default function PauseCard({
 		setErreur(null);
 		try {
 			const reponse = await fetch(`/api/pauses/${pauseId}`, { method: "PATCH" });
-			if (!reponse.ok) throw new Error();
+			if (!reponse.ok) throw new Error("Échec de la fin de pause");
 			setPauseId(null);
 			router.refresh();
 		} catch {
@@ -86,6 +86,13 @@ export default function PauseCard({
 	}
 
 	const enCours = pauseId !== null;
+
+	let libelleBouton: string;
+	if (enChargement) {
+		libelleBouton = "...";
+	} else {
+		libelleBouton = enCours ? "Terminer" : "Lancer";
+	}
 
 	return (
 		<div
@@ -105,7 +112,7 @@ export default function PauseCard({
 					enCours ? style.boutonActif : `bg-white ${style.bouton}`
 				}`}
 			>
-				{enChargement ? "..." : enCours ? "Terminer" : "Lancer"}
+				{libelleBouton}
 			</button>
 		</div>
 	);

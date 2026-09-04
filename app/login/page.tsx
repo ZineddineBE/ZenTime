@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Leaf, Lock, Mail } from 'lucide-react';
 import { signIn } from "next-auth/react";
@@ -37,7 +37,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(""); // Reset de l'erreur
 
@@ -113,11 +113,11 @@ export default function LoginPage() {
                 type="checkbox"
                 className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 mr-2"
               />
-              Se souvenir de moi
+              <span>Se souvenir de moi</span>
             </label>
-            <a href="#" className="text-emerald-600 font-semibold hover:underline">
+            <button type="button" className="text-emerald-600 font-semibold hover:underline">
               Mot de passe oublié ?
-            </a>
+            </button>
           </div>
 
           <button

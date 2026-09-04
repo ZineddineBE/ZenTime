@@ -28,7 +28,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					include: { role: true },
 				});
 
-				if (user && user.mdp_utilisateur) {
+				if (user?.mdp_utilisateur) {
 					const isPasswordCorrect = await bcrypt.compare(
 						credentials.password as string,
 						user.mdp_utilisateur,

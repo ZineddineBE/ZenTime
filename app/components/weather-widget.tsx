@@ -35,7 +35,7 @@ export default function WeatherWidget() {
 
 		fetch(API_METEO_URL)
 			.then((reponse) => {
-				if (!reponse.ok) throw new Error();
+				if (!reponse.ok) throw new Error("Échec de la récupération de la météo");
 				return reponse.json();
 			})
 			.then((donnees) => {
